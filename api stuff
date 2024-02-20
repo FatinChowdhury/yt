@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>YouTube Channel Videos</title>
+  </head>
+  <body>
+    <h1>YouTube Channel Videos</h1>
+    <div id="video-container"></div>
+
+    <script>
+      // Replace 'YOUR_API_KEY' with your actual API key
+      const apiKey = 'YOUR_API_KEY';
+      const channelId = 'UCqAEtEr0A0Eo2IVcuWBfB9gUC_ING8slQbpvxRHYp99stJQ'; // Replace with the channel ID
+      const maxResults = 50; // Maximum number of videos to retrieve
+
+      // Load the Google APIs Client Library
+      const script = document.createElement('script');
+      script.src = 'https://apis.google.com/js/api.js';
+      script.onload = initClient;
+      document.head.appendChild(script);
+
+      function initClient() {
+        gapi.load('client:youTube', initAPI);
+      }
+
+      function initAPI() {
+        gapi.client.init({
+          'apiKey': apiKey,
+          'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
+        }).then(function() {
+          search();
+        });
+      }
+
+      function search() {
+        const request = gapi.client.youtube.search.list({
+          'part': 'snippet',
+          'channelId': channelId,
+          'maxResults': maxResults,
+          'type': 'video'
+        });
+        request.execute(onSearchResult);
+      }
+
+      function onSearchResult(response) {
+        const videos = response.result.items;
+        if (videos) {
+          const videoContainer = document.getElementById('video-container');
+          videos.forEach(video => {
+            const videoElement = document.createElement('div');
+            videoElement.innerHTML = `
+              <h2>${video.snippet.title}</h2>
+              <iframe width="560" height="315" src="https://www.youtube.com/embed/${video.id.videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            `;
+            videoContainer.appendChild(videoElement);
+          });
+        } else {
+          console.log('No videos found');
+        }
+      }
+    </script>
+  </body>
+</HTML>
